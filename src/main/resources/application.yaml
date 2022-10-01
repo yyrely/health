@@ -1,0 +1,46 @@
+server:
+  port: 8060
+
+spring:
+  mvc:
+    servlet:
+      load-on-startup: 1
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  aop:
+    proxy-target-class: true
+  main:
+    lazy-initialization: false
+  http:
+    encoding:
+      enabled: true
+      force: true
+      charset: utf-8
+  datasource:
+    url: jdbc:mysql://sh-cynosdbmysql-grp-hg1wfxgw.sql.tencentcdb.com:24025/iot?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    username: iot_user
+    password: IotUser,123
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-test-query: SELECT 1 FROM DUAL
+      idle-timeout: 60000
+      connection-timeout: 60000
+      validation-timeout: 3000
+      login-timeout: 5
+      max-lifetime: 60000
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDel
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: /data/logs/crm
