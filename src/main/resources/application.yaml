@@ -43,4 +43,4 @@ mybatis-plus:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: /data/logs/crm
+    path: /data/logs/health
