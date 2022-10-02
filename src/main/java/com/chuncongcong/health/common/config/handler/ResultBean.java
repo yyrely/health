@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import com.chuncongcong.health.common.exception.BaseErrorCode;
 import com.chuncongcong.health.common.exception.ServiceException;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -13,6 +15,7 @@ import lombok.Data;
  */
 
 @Data
+@ApiModel("api通用返回数据")
 public class ResultBean<T> implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,10 +23,13 @@ public class ResultBean<T> implements Serializable {
     public final static int SUCCESS = 0;
     public final static int FAIL = 1;
 
+    @ApiModelProperty("标识代码,1表示成功，非1表示出错")
     private int code;
 
+    @ApiModelProperty("返回对象")
     private T data;
 
+    @ApiModelProperty("异常信息")
     private String msg;
 
 
