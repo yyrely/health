@@ -13,14 +13,8 @@ import lombok.Data;
 @Data
 public class HeartRateInfoVo {
 
-	@ApiModelProperty("次数")
-	private Integer nums;
-
-	@ApiModelProperty("状态")
-	private String status;
-
-	@ApiModelProperty("异常次数")
-	private Integer errorNums;
+	@ApiModelProperty("平均次数")
+	private Integer averageNums;
 
 	@ApiModelProperty("心率列表")
 	private List<HeartRateVo> heartRateVoList;

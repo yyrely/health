@@ -1,5 +1,7 @@
 package com.chuncongcong.health.model.vo;
 
+import java.time.LocalDateTime;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -14,6 +16,6 @@ public class PittsburghSleepQualityVo {
 	@ApiModelProperty("指数")
 	private Integer nums;
 
-	@ApiModelProperty("建议")
-	private String suggest;
+	@ApiModelProperty("日期")
+	private LocalDateTime time;
 }

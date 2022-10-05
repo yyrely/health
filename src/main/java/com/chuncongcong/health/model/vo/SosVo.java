@@ -14,7 +14,7 @@ import lombok.Data;
 public class SosVo {
 
 	@ApiModelProperty("设备号")
-	private String zhdXlh;
+	private String deviceCode;
 
 	@ApiModelProperty("求助时间")
 	private LocalDateTime time;

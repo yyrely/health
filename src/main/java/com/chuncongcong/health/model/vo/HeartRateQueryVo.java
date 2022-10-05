@@ -12,12 +12,11 @@ import lombok.Data;
 public class HeartRateQueryVo {
 
 	@ApiModelProperty("设备号")
-	private String zhdXlh;
+	private String deviceCode;
 
-	@ApiModelProperty("年月")
-	private String yearMonth;
+	@ApiModelProperty("开始时间")
+	private String StartTime;
 
-	@ApiModelProperty("年月日")
-	private String time;
-
+	@ApiModelProperty("结束时间")
+	private String endTime;
 }

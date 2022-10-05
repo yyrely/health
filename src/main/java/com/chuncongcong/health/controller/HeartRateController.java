@@ -4,9 +4,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chuncongcong.health.model.vo.HeartRateDayVo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chuncongcong.health.model.vo.HeartRateInfoVo;
 import com.chuncongcong.health.model.vo.HeartRateQueryVo;
+import com.chuncongcong.health.model.vo.HeartRateVo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,16 +29,10 @@ public class HeartRateController {
 		return new HeartRateInfoVo();
 	}
 
-	@GetMapping("/month/error")
-	@ApiOperation("月异常信息")
-	public Boolean[] monthError(HeartRateQueryVo heartRateQueryVo) {
-		return new Boolean[30];
-	}
-
-	@GetMapping("/day/report")
-	@ApiOperation("日统计")
-	public HeartRateDayVo dayReport(HeartRateQueryVo heartRateQueryVo) {
-		return new HeartRateDayVo();
+	@GetMapping("/list")
+	@ApiOperation("根据时间获取心率列表(分页)")
+	public IPage<HeartRateVo> list(HeartRateQueryVo heartRateQueryVo, Page page) {
+		return new Page<>();
 	}
 
 }

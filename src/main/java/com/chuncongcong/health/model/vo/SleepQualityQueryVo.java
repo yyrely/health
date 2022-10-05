@@ -12,7 +12,7 @@ import lombok.Data;
 public class SleepQualityQueryVo {
 
 	@ApiModelProperty("设备号")
-	private String zhdXlh;
+	private String deviceCode;
 
 	@ApiModelProperty("查询开始日期（yyyy-MM-dd）")
 	private String startTime;

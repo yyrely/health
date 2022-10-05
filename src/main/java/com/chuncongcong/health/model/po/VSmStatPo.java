@@ -2,7 +2,6 @@ package com.chuncongcong.health.model.po;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,7 +21,7 @@ public class VSmStatPo {
 
     @MppMultiId
     @TableField(value = "ZhD_xlh")
-    private String zhdXlh;
+    private String deviceCode;
 
     @MppMultiId
     @TableField(value = "flagdate")

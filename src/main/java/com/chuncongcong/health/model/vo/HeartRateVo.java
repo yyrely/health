@@ -16,9 +16,6 @@ public class HeartRateVo {
 	@ApiModelProperty("数值")
 	private Integer nums;
 
-	@ApiModelProperty("状态")
-	private String status;
-
 	@ApiModelProperty("时间")
 	private LocalDateTime time;
 }

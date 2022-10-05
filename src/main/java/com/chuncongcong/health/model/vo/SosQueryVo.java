@@ -12,6 +12,6 @@ import lombok.Data;
 public class SosQueryVo {
 
 	@ApiModelProperty("设备号")
-	String zhdXlh;
+	String deviceCode;
 
 }

@@ -12,8 +12,11 @@ import lombok.Data;
 public class HealthReportQueryVo {
 
 	@ApiModelProperty("设备号")
-	private String zhdXlh;
+	private String deviceCode;
 
-	@ApiModelProperty("报表日期（yyyy-MM-dd）")
-	private String flagDate;
+	@ApiModelProperty("开始时间")
+	private String startTime;
+
+	@ApiModelProperty("结束时间")
+	private String endTime;
 }

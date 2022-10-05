@@ -4,11 +4,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chuncongcong.health.model.vo.HeartRateDayVo;
-import com.chuncongcong.health.model.vo.HeartRateInfoVo;
-import com.chuncongcong.health.model.vo.HeartRateQueryVo;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.chuncongcong.health.model.vo.RespiratoryRateInfoVo;
 import com.chuncongcong.health.model.vo.RespiratoryRateQueryVo;
+import com.chuncongcong.health.model.vo.RespiratoryRateVo;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -24,20 +25,15 @@ public class RespiratoryRateController {
 
 	@GetMapping("/info")
 	@ApiOperation("呼吸信息")
-	public HeartRateInfoVo info(RespiratoryRateQueryVo heartRateQueryVo) {
-		return new HeartRateInfoVo();
+	public RespiratoryRateInfoVo info(RespiratoryRateQueryVo respiratoryRateQueryVo) {
+		return new RespiratoryRateInfoVo();
 	}
 
-	@GetMapping("/month/error")
-	@ApiOperation("月异常信息, 数组下标标识日期，1-异常，0-正常")
-	public Boolean[] monthError(RespiratoryRateQueryVo heartRateQueryVo) {
-		return new Boolean[30];
+	@GetMapping("/list")
+	@ApiOperation("根据时间获取呼吸率列表(分页)")
+	public IPage<RespiratoryRateVo> monthError(RespiratoryRateQueryVo respiratoryRateQueryVo, Page page) {
+		return new Page<>();
 	}
 
-	@GetMapping("/day/report")
-	@ApiOperation("日统计")
-	public HeartRateDayVo dayReport(RespiratoryRateQueryVo heartRateQueryVo) {
-		return new HeartRateDayVo();
-	}
 
 }
