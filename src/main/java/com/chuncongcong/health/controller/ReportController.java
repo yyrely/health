@@ -1,7 +1,11 @@
 package com.chuncongcong.health.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.chuncongcong.health.common.exception.ServiceException;
+import com.chuncongcong.health.model.po.TSmStatPo;
 import com.chuncongcong.health.model.po.VSmStatPo;
 import com.chuncongcong.health.model.vo.HealthReportQueryVo;
 import com.chuncongcong.health.model.vo.HealthReportVo;
+import com.chuncongcong.health.model.vo.HeartRateVo;
+import com.chuncongcong.health.model.vo.RespiratoryRateVo;
 import com.chuncongcong.health.model.vo.SleepInfoVo;
+import com.chuncongcong.health.model.vo.SleepStatusVo;
+import com.chuncongcong.health.service.ITSmStatService;
 import com.chuncongcong.health.service.IVSmStatService;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -41,17 +50,25 @@ public class ReportController {
 	@Autowired
 	private IVSmStatService ivSmStatService;
 
+	@Autowired
+	private ITSmStatService itSmStatService;
+
 	@GetMapping("/health")
 	@ApiOperation("根据设备号和日期查询报表")
 	public HealthReportVo getReport(HealthReportQueryVo healthReportQueryVo) {
 		if(StrUtil.isEmpty(healthReportQueryVo.getDeviceCode()) || StrUtil.isEmpty(healthReportQueryVo.getStartTime())) {
 			throw new ServiceException("参数异常");
 		}
-		LambdaQueryWrapper<VSmStatPo> query = Wrappers.lambdaQuery(VSmStatPo.class);
-		query.eq(VSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
-		LocalDate localFlagDate = LocalDate.parse(healthReportQueryVo.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-		query.eq(VSmStatPo::getFlagDate, localFlagDate);
-		VSmStatPo vSmStatPo = ivSmStatService.getOne(query);
+
+		LocalDate startTime = LocalDate.parse(healthReportQueryVo.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		LocalDate endTime = LocalDate.parse(healthReportQueryVo.getEndTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+		LambdaQueryWrapper<VSmStatPo> vSmStatPoQuery = Wrappers.lambdaQuery(VSmStatPo.class);
+		vSmStatPoQuery.eq(VSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
+
+
+		vSmStatPoQuery.eq(VSmStatPo::getFlagDate, startTime);
+		VSmStatPo vSmStatPo = ivSmStatService.getOne(vSmStatPoQuery);
 		if(Objects.isNull(vSmStatPo)) {
 			return null;
 		}
@@ -59,7 +76,7 @@ public class ReportController {
 		String pgSleepTime = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
 				.header(Header.CONTENT_TYPE, "application/json")
 				.header("x-hasura-admin-secret", "myadminsecretkey")
-				.body("{\"query\":\"query {\\r\\n  iot_report(where: {serial_no: {_eq: " + healthReportQueryVo.getDeviceCode() + "}, _and: {dt: {_eq: " + localFlagDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "}}}) {\\r\\n    create_time\\r\\n    bed_time\\r\\n  }\\r\\n}\\r\\n\",\"variables\":{}}")
+				.body("{\"query\":\"query {\\r\\n  iot_report(where: {serial_no: {_eq: " + healthReportQueryVo.getDeviceCode() + "}, _and: {dt: {_eq: " + startTime.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + "}}}) {\\r\\n    create_time\\r\\n    bed_time\\r\\n  }\\r\\n}\\r\\n\",\"variables\":{}}")
 				.execute().body();
 
 		JSONObject jsonObject = JSONUtil.parseObj(pgSleepTime).getJSONObject("data").getJSONObject("iot_report");
@@ -74,6 +91,34 @@ public class ReportController {
 		}
 		HealthReportVo healthReportVo = new HealthReportVo();
 		healthReportVo.setSleepInfoVo(BeanUtil.copyProperties(vSmStatPo, SleepInfoVo.class));
+
+		LambdaQueryWrapper<TSmStatPo> tSmStatPoQuery = Wrappers.lambdaQuery(TSmStatPo.class);
+		tSmStatPoQuery.eq(TSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
+		tSmStatPoQuery.ge(TSmStatPo::getStatTime, startTime.atStartOfDay());
+		tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
+		List<TSmStatPo> list = itSmStatService.list(tSmStatPoQuery);
+		List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
+		List<HeartRateVo> heartRateVos = new ArrayList<>();
+		List<RespiratoryRateVo> respiratoryRateVos = new ArrayList<>();
+		for (TSmStatPo tSmStatPo : list) {
+			SleepStatusVo sleepStatusVo = new SleepStatusVo();
+			sleepStatusVo.setStatus(tSmStatPo.getStat2());
+			sleepStatusVo.setTime(tSmStatPo.getStatTime());
+			sleepStatusVos.add(sleepStatusVo);
+
+			HeartRateVo heartRateVo = new HeartRateVo();
+			heartRateVo.setNums(tSmStatPo.getHRate());
+			heartRateVo.setTime(tSmStatPo.getStatTime());
+			heartRateVos.add(heartRateVo);
+
+			RespiratoryRateVo respiratoryRateVo = new RespiratoryRateVo();
+			respiratoryRateVo.setNums(tSmStatPo.getRespRate());
+			respiratoryRateVo.setTime(tSmStatPo.getStatTime());
+			respiratoryRateVos.add(respiratoryRateVo);
+		}
+		healthReportVo.setSleepStatusVos(sleepStatusVos);
+		healthReportVo.setHeartRateVos(heartRateVos);
+		healthReportVo.setRespiratoryRateVos(respiratoryRateVos);
 		return healthReportVo;
 	}
 
