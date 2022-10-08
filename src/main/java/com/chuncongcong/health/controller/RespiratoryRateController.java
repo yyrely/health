@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.model.vo.RespiratoryRateInfoVo;
 import com.chuncongcong.health.model.vo.RespiratoryRateQueryVo;
 import com.chuncongcong.health.model.vo.RespiratoryRateVo;
@@ -19,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @RestController
-@RequestMapping("/respiratory/rate")
+@RequestMapping(CommonConstant.BASE_URL + "/respiratory/rate")
 @Api(value = "respiratory rate", tags = "呼吸率")
 public class RespiratoryRateController {
 

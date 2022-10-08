@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.model.vo.SosVo;
 
 import io.swagger.annotations.Api;
@@ -18,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @RestController
-@RequestMapping("/sos")
+@RequestMapping(CommonConstant.BASE_URL + "/sos")
 @Api(value = "sos", tags = "紧急求助")
 public class SosController {
 

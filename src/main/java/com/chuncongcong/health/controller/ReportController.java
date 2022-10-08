@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.common.exception.ServiceException;
 import com.chuncongcong.health.model.po.TSmStatPo;
 import com.chuncongcong.health.model.po.VSmStatPo;
@@ -44,7 +45,7 @@ import io.swagger.annotations.ApiOperation;
  */
 
 @RestController
-@RequestMapping("/report")
+@RequestMapping(CommonConstant.BASE_URL + "/report")
 @Api(value = "report", tags = "每日报表")
 public class ReportController {
 
