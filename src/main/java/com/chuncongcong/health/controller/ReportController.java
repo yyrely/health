@@ -19,6 +19,7 @@ import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.common.exception.ServiceException;
 import com.chuncongcong.health.model.po.TSmStatPo;
 import com.chuncongcong.health.model.po.VSmStatPo;
+import com.chuncongcong.health.model.vo.AHIVo;
 import com.chuncongcong.health.model.vo.HealthReportQueryVo;
 import com.chuncongcong.health.model.vo.HealthReportVo;
 import com.chuncongcong.health.model.vo.HeartRateVo;
@@ -104,6 +105,7 @@ public class ReportController {
             List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
             List<HeartRateVo> heartRateVos = new ArrayList<>();
             List<RespiratoryRateVo> respiratoryRateVos = new ArrayList<>();
+            List<AHIVo> ahiVos = new ArrayList<>();
             for (TSmStatPo tSmStatPo : tSmStatPos) {
                 SleepStatusVo sleepStatusVo = new SleepStatusVo();
                 sleepStatusVo.setStatus(tSmStatPo.getStat2());
@@ -119,10 +121,17 @@ public class ReportController {
                 respiratoryRateVo.setNums(tSmStatPo.getRespRate());
                 respiratoryRateVo.setTime(tSmStatPo.getStatTime());
                 respiratoryRateVos.add(respiratoryRateVo);
+
+                AHIVo ahiVo = new AHIVo();
+                ahiVo.setNums(tSmStatPo.getAhio() == null ? 0 : tSmStatPo.getAhio() +
+                        (tSmStatPo.getAhis() == null ? 0 : tSmStatPo.getAhis()));
+                ahiVo.setTime(tSmStatPo.getStatTime());
+                ahiVos.add(ahiVo);
             }
             healthReportVo.setSleepStatusVos(sleepStatusVos);
             healthReportVo.setHeartRateVos(heartRateVos);
             healthReportVo.setRespiratoryRateVos(respiratoryRateVos);
+            healthReportVo.setAhiVos(ahiVos);
         }
         return healthReportVo;
     }

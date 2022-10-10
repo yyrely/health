@@ -1,6 +1,6 @@
 package com.chuncongcong.health.model.vo;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,8 +14,8 @@ import lombok.Data;
 public class SleepQualityResultVo {
 
 	@ApiModelProperty("睡眠状态集合")
-	private List<SleepStatusVo> sleepStatusVoList;
+	private IPage<SleepStatusVo> sleepStatusVoPage;
 
 	@ApiModelProperty("匹兹堡睡眠质量集合")
-	private List<PittsburghSleepQualityVo> pittsburghSleepQualityList;
+	private IPage<PittsburghSleepQualityVo> pittsburghSleepQualityPage;
 }
