@@ -19,22 +19,22 @@ import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.common.exception.ServiceException;
 import com.chuncongcong.health.model.po.TSmStatPo;
 import com.chuncongcong.health.model.po.VSmStatPo;
-import com.chuncongcong.health.model.vo.AHIVo;
+import com.chuncongcong.health.model.vo.AHIReportVo;
 import com.chuncongcong.health.model.vo.HealthReportQueryVo;
 import com.chuncongcong.health.model.vo.HealthReportVo;
-import com.chuncongcong.health.model.vo.HeartRateVo;
-import com.chuncongcong.health.model.vo.RespiratoryRateVo;
+import com.chuncongcong.health.model.vo.HeartRateReportVo;
+import com.chuncongcong.health.model.vo.RespiratoryRateReportVo;
 import com.chuncongcong.health.model.vo.SleepInfoVo;
 import com.chuncongcong.health.model.vo.SleepStatusVo;
 import com.chuncongcong.health.service.ITSmStatService;
 import com.chuncongcong.health.service.IVSmStatService;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import io.swagger.annotations.Api;
@@ -75,12 +75,13 @@ public class ReportController {
 
         vSmStatPoQuery.eq(VSmStatPo::getFlagDate, startTime);
         VSmStatPo vSmStatPo = ivSmStatService.getOne(vSmStatPoQuery);
+        AHIReportVo ahiReportVo = new AHIReportVo();
         if (Objects.nonNull(vSmStatPo)) {
-            String query = "{\"query\":\"query {\\r\\n  iot_report(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, _and: {dt: {_eq: "+ startTime.format(DateTimeFormatter.ofPattern("yyyyMMdd")) +"}}}) {\\r\\n    create_time\\r\\n    bed_time\\r\\n  }\\r\\n}\\r\\n\",\"variables\":{}}";
-            String pgSleepTime = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
-                .header(Header.CONTENT_TYPE, "application/json").header("x-hasura-admin-secret", "myadminsecretkey")
-                .body(query).execute().body();
 			try {
+                String query = "{\"query\":\"query {\\r\\n  iot_report(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, _and: {dt: {_eq: "+ startTime.format(DateTimeFormatter.ofPattern("yyyyMMdd")) +"}}}) {\\r\\n    create_time\\r\\n    bed_time\\r\\n  }\\r\\n}\\r\\n\",\"variables\":{}}";
+                String pgSleepTime = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
+                        .header(Header.CONTENT_TYPE, "application/json").header("x-hasura-admin-secret", "myadminsecretkey")
+                        .body(query).execute().body();
 				JSONObject jsonObject = JSONUtil.parseObj(pgSleepTime).getJSONObject("data").getJSONObject("iot_report");
 				String upTime = jsonObject.getStr("up_time");
 				String bedTime = jsonObject.getStr("bed_time");
@@ -94,45 +95,48 @@ public class ReportController {
 
 			}
             healthReportVo.setSleepInfoVo(BeanUtil.copyProperties(vSmStatPo, SleepInfoVo.class));
+            ahiReportVo.setStatus(healthReportVo.getSleepInfoVo().getAhis());
         }
-
         LambdaQueryWrapper<TSmStatPo> tSmStatPoQuery = Wrappers.lambdaQuery(TSmStatPo.class);
         tSmStatPoQuery.eq(TSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
         tSmStatPoQuery.ge(TSmStatPo::getStatTime, startTime.atStartOfDay());
         tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
         List<TSmStatPo> tSmStatPos = itSmStatService.list(tSmStatPoQuery);
-        if (CollectionUtil.isNotEmpty(tSmStatPos)) {
-            List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
-            List<HeartRateVo> heartRateVos = new ArrayList<>();
-            List<RespiratoryRateVo> respiratoryRateVos = new ArrayList<>();
-            List<AHIVo> ahiVos = new ArrayList<>();
-            for (TSmStatPo tSmStatPo : tSmStatPos) {
-                SleepStatusVo sleepStatusVo = new SleepStatusVo();
-                sleepStatusVo.setStatus(tSmStatPo.getStat2());
-                sleepStatusVo.setTime(tSmStatPo.getStatTime());
-                sleepStatusVos.add(sleepStatusVo);
 
-                HeartRateVo heartRateVo = new HeartRateVo();
-                heartRateVo.setNums(tSmStatPo.getHRate());
-                heartRateVo.setTime(tSmStatPo.getStatTime());
-                heartRateVos.add(heartRateVo);
-
-                RespiratoryRateVo respiratoryRateVo = new RespiratoryRateVo();
-                respiratoryRateVo.setNums(tSmStatPo.getRespRate());
-                respiratoryRateVo.setTime(tSmStatPo.getStatTime());
-                respiratoryRateVos.add(respiratoryRateVo);
-
-                AHIVo ahiVo = new AHIVo();
-                ahiVo.setNums(tSmStatPo.getAhio() == null ? 0 : tSmStatPo.getAhio() +
-                        (tSmStatPo.getAhis() == null ? 0 : tSmStatPo.getAhis()));
-                ahiVo.setTime(tSmStatPo.getStatTime());
-                ahiVos.add(ahiVo);
+        HeartRateReportVo heartRateReportVo = new HeartRateReportVo();
+        RespiratoryRateReportVo respiratoryRateReportVo = new RespiratoryRateReportVo();
+        Integer heartRateNums = 0;
+        Integer respiratoryRateNums = 0;
+        try {
+            String query = "{\"query\":\"query {\\r\\n  iot_breath(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, measure_time: {_lte: \\\""+ LocalDateTime.of(endTime, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\", _gte: \\\""+ startTime.atStartOfDay().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\"}}) {\\r\\n    heart_rate\\r\\n    breath_rate\\r\\n    measure_time\\r\\n    serial_no\\r\\n  }\\r\\n}\",\"variables\":{}}";
+            String iotBreathResult = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
+                    .header(Header.CONTENT_TYPE, "application/json").header("x-hasura-admin-secret", "myadminsecretkey")
+                    .body(query).execute().body();
+            JSONArray iotBreathJsonArray = JSONUtil.parseObj(iotBreathResult).getJSONObject("data").getJSONArray("iot_breath");
+            if(Objects.nonNull(iotBreathJsonArray)) {
+                for (int i = 0; i < iotBreathJsonArray.size(); i++) {
+                    JSONObject iotBreathObject = iotBreathJsonArray.getJSONObject(i);
+                    Integer heartRate = iotBreathObject.getInt("heart_rate");
+                    if(Objects.nonNull(heartRate) && heartRate > 0) {
+                        heartRateNums++;
+                    }
+                    Integer breathRate = iotBreathObject.getInt("breath_rate");
+                    if(Objects.nonNull(breathRate) && breathRate > 0) {
+                        respiratoryRateNums++;
+                    }
+                }
             }
-            healthReportVo.setSleepStatusVos(sleepStatusVos);
-            healthReportVo.setHeartRateVos(heartRateVos);
-            healthReportVo.setRespiratoryRateVos(respiratoryRateVos);
-            healthReportVo.setAhiVos(ahiVos);
+        } catch (Exception e) {
+
         }
+        heartRateReportVo.setTotalNum(heartRateNums);
+        respiratoryRateReportVo.setTotalNum(respiratoryRateNums);
+
+        List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
+        healthReportVo.setSleepStatusVos(sleepStatusVos);
+        healthReportVo.setHeartRateVos(heartRateReportVo);
+        healthReportVo.setRespiratoryRateVos(respiratoryRateReportVo);
+        healthReportVo.setAhiVos(ahiReportVo);
         return healthReportVo;
     }
 

@@ -21,15 +21,15 @@ public class HealthReportVo {
     private List<SleepStatusVo> sleepStatusVos;
 
     @ApiModelProperty("心率信息")
-    private List<HeartRateVo> heartRateVos;
+    private HeartRateReportVo heartRateVos;
 
     @ApiModelProperty("呼吸率信息")
-    private List<RespiratoryRateVo> respiratoryRateVos;
+    private RespiratoryRateReportVo respiratoryRateVos;
 
     @ApiModelProperty("AHI指数列表")
-    private List<AHIVo> ahiVos;
+    private AHIReportVo ahiVos;
 
     @ApiModelProperty("匹兹堡睡眠质量列表")
-    private List<PittsburghSleepQualityVo> pittsburghSleepQualityVos;
+    private PittsburghSleepQualityReportVo pittsburghSleepQualityVos;
 
 }
