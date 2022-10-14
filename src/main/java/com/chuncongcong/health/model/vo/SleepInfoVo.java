@@ -37,14 +37,26 @@ public class SleepInfoVo {
 	@ApiModelProperty("离床时间")
 	private Integer removeBed;
 
+	@ApiModelProperty("离床时间状态")
+	private Integer removeBedStatus;
+
 	@ApiModelProperty("离床次数")
 	private Integer removeBedNums;
+
+	@ApiModelProperty("离床次数状态")
+	private Integer removeBedNumsStatus;
 
 	@ApiModelProperty("体动次数")
 	private Integer doNums;
 
+	@ApiModelProperty("体动次数状态")
+	private Integer doNumsStatus;
+
 	@ApiModelProperty("睡眠效率")
 	private Integer sleepEfficiency;
+
+	@ApiModelProperty("睡眠效率状态")
+	private Integer sleepEfficiencyStatus;
 
 	@ApiModelProperty("入睡后醒来时间")
 	private Integer waso;
