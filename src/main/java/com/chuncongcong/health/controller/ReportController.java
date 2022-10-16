@@ -107,30 +107,32 @@ public class ReportController {
         RespiratoryRateReportVo respiratoryRateReportVo = new RespiratoryRateReportVo();
         Integer heartRateNums = 0;
         Integer respiratoryRateNums = 0;
+        heartRateReportVo.setTotalNum(heartRateNums);
+        respiratoryRateReportVo.setTotalNum(respiratoryRateNums);
         try {
             String query = "{\"query\":\"query {\\r\\n  iot_breath(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, measure_time: {_lte: \\\""+ LocalDateTime.of(endTime, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\", _gte: \\\""+ startTime.atStartOfDay().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\"}}) {\\r\\n    heart_rate\\r\\n    breath_rate\\r\\n    measure_time\\r\\n    serial_no\\r\\n  }\\r\\n}\",\"variables\":{}}";
             String iotBreathResult = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
                     .header(Header.CONTENT_TYPE, "application/json").header("x-hasura-admin-secret", "myadminsecretkey")
                     .body(query).execute().body();
             JSONArray iotBreathJsonArray = JSONUtil.parseObj(iotBreathResult).getJSONObject("data").getJSONArray("iot_breath");
-            if(Objects.nonNull(iotBreathJsonArray)) {
+            if(Objects.nonNull(iotBreathJsonArray) && iotBreathJsonArray.size() > 0) {
                 for (int i = 0; i < iotBreathJsonArray.size(); i++) {
                     JSONObject iotBreathObject = iotBreathJsonArray.getJSONObject(i);
                     Integer heartRate = iotBreathObject.getInt("heart_rate");
                     if(Objects.nonNull(heartRate) && heartRate > 0) {
-                        heartRateNums++;
+                        heartRateNums += heartRate;
                     }
                     Integer breathRate = iotBreathObject.getInt("breath_rate");
                     if(Objects.nonNull(breathRate) && breathRate > 0) {
-                        respiratoryRateNums++;
+                        respiratoryRateNums += breathRate;
                     }
                 }
+                heartRateReportVo.setTotalNum(heartRateNums/iotBreathJsonArray.size());
+                respiratoryRateReportVo.setTotalNum(respiratoryRateNums/iotBreathJsonArray.size());
             }
         } catch (Exception e) {
 
         }
-        heartRateReportVo.setTotalNum(heartRateNums);
-        respiratoryRateReportVo.setTotalNum(respiratoryRateNums);
 
         List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
         healthReportVo.setSleepStatusVos(sleepStatusVos);
