@@ -18,7 +18,7 @@ public class HealthReportVo {
     private SleepInfoVo sleepInfoVo;
 
     @ApiModelProperty("睡眠状态列表")
-    private List<SleepStatusVo> sleepStatusVos;
+    private List<SleepStatusRateVo> sleepStatusVos;
 
     @ApiModelProperty("心率信息")
     private HeartRateReportVo heartRateVos;

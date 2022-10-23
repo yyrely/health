@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chuncongcong.health.mapper.TSmStatMapper">
+
+	<select id="sleepStatus" resultType="com.chuncongcong.health.model.vo.SleepStatusRateVo">
+		SELECT
+		stat2 as status,
+		COUNT( * ) as size
+		FROM
+		`t_sm_stat`
+		WHERE
+		ZhD_xlh = #{deviceCode}
+		AND stattime >= #{startTime}
+		AND stattime &lt;= #{endTime}
+		GROUP BY stat2
+	</select>
+</mapper>

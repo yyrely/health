@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +23,7 @@ import com.chuncongcong.health.model.vo.HealthReportVo;
 import com.chuncongcong.health.model.vo.HeartRateReportVo;
 import com.chuncongcong.health.model.vo.RespiratoryRateReportVo;
 import com.chuncongcong.health.model.vo.SleepInfoVo;
-import com.chuncongcong.health.model.vo.SleepStatusVo;
+import com.chuncongcong.health.model.vo.SleepStatusRateVo;
 import com.chuncongcong.health.service.ITSmStatService;
 import com.chuncongcong.health.service.IVSmStatService;
 
@@ -102,6 +101,9 @@ public class ReportController {
 //        tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
 //        List<TSmStatPo> tSmStatPos = itSmStatService.list(tSmStatPoQuery);
 
+        List<SleepStatusRateVo> sleepStatusRateVos = itSmStatService.sleepStatus(healthReportQueryVo.getDeviceCode(), startTime.atStartOfDay(), LocalDateTime.of(endTime, LocalTime.MAX));
+        healthReportVo.setSleepStatusVos(sleepStatusRateVos);
+
         HeartRateReportVo heartRateReportVo = new HeartRateReportVo();
         RespiratoryRateReportVo respiratoryRateReportVo = new RespiratoryRateReportVo();
         Integer heartRateNums = 0;
@@ -132,9 +134,6 @@ public class ReportController {
         } catch (Exception e) {
 
         }
-
-        List<SleepStatusVo> sleepStatusVos = new ArrayList<>();
-        healthReportVo.setSleepStatusVos(sleepStatusVos);
         healthReportVo.setHeartRateVos(heartRateReportVo);
         healthReportVo.setRespiratoryRateVos(respiratoryRateReportVo);
         healthReportVo.setAhiVos(ahiReportVo);
