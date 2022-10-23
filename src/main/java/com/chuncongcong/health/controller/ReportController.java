@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.chuncongcong.health.common.constant.CommonConstant;
 import com.chuncongcong.health.common.exception.ServiceException;
-import com.chuncongcong.health.model.po.TSmStatPo;
 import com.chuncongcong.health.model.po.VSmStatPo;
 import com.chuncongcong.health.model.vo.AHIReportVo;
 import com.chuncongcong.health.model.vo.HealthReportQueryVo;
@@ -97,11 +96,11 @@ public class ReportController {
             healthReportVo.setSleepInfoVo(BeanUtil.copyProperties(vSmStatPo, SleepInfoVo.class));
             ahiReportVo.setStatus(healthReportVo.getSleepInfoVo().getAhis());
         }
-        LambdaQueryWrapper<TSmStatPo> tSmStatPoQuery = Wrappers.lambdaQuery(TSmStatPo.class);
-        tSmStatPoQuery.eq(TSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
-        tSmStatPoQuery.ge(TSmStatPo::getStatTime, startTime.atStartOfDay());
-        tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
-        List<TSmStatPo> tSmStatPos = itSmStatService.list(tSmStatPoQuery);
+//        LambdaQueryWrapper<TSmStatPo> tSmStatPoQuery = Wrappers.lambdaQuery(TSmStatPo.class);
+//        tSmStatPoQuery.eq(TSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
+//        tSmStatPoQuery.ge(TSmStatPo::getStatTime, startTime.atStartOfDay());
+//        tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
+//        List<TSmStatPo> tSmStatPos = itSmStatService.list(tSmStatPoQuery);
 
         HeartRateReportVo heartRateReportVo = new HeartRateReportVo();
         RespiratoryRateReportVo respiratoryRateReportVo = new RespiratoryRateReportVo();
@@ -110,12 +109,12 @@ public class ReportController {
         heartRateReportVo.setTotalNum(heartRateNums);
         respiratoryRateReportVo.setTotalNum(respiratoryRateNums);
         try {
-            String query = "{\"query\":\"query {\\r\\n  iot_breath(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, measure_time: {_lte: \\\""+ LocalDateTime.of(endTime, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\", _gte: \\\""+ startTime.atStartOfDay().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\"}}) {\\r\\n    heart_rate\\r\\n    breath_rate\\r\\n    measure_time\\r\\n    serial_no\\r\\n  }\\r\\n}\",\"variables\":{}}";
+            String query = "{\"query\":\"query {\\r\\n  iot_breath(where: {serial_no: {_eq: \\\""+ healthReportQueryVo.getDeviceCode() +"\\\"}, measure_time: {_lte: \\\""+ LocalDateTime.of(endTime, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\", _gte: \\\""+ startTime.atStartOfDay().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) +"\\\"}}, order_by: {measure_time: desc}, limit: 100) {\\r\\n    heart_rate\\r\\n    breath_rate\\r\\n    measure_time\\r\\n    serial_no\\r\\n  }\\r\\n}\",\"variables\":{}}";
             String iotBreathResult = HttpRequest.post("https://hasura.d.leyinlin.com/v1/graphql")
                     .header(Header.CONTENT_TYPE, "application/json").header("x-hasura-admin-secret", "myadminsecretkey")
                     .body(query).execute().body();
             JSONArray iotBreathJsonArray = JSONUtil.parseObj(iotBreathResult).getJSONObject("data").getJSONArray("iot_breath");
-            if(Objects.nonNull(iotBreathJsonArray) && iotBreathJsonArray.size() > 0) {
+                if(Objects.nonNull(iotBreathJsonArray) && iotBreathJsonArray.size() > 0) {
                 for (int i = 0; i < iotBreathJsonArray.size(); i++) {
                     JSONObject iotBreathObject = iotBreathJsonArray.getJSONObject(i);
                     Integer heartRate = iotBreathObject.getInt("heart_rate");
