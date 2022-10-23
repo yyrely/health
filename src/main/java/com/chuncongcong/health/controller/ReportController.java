@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,8 +103,17 @@ public class ReportController {
 //        tSmStatPoQuery.le(TSmStatPo::getStatTime, LocalDateTime.of(endTime, LocalTime.MAX));
 //        List<TSmStatPo> tSmStatPos = itSmStatService.list(tSmStatPoQuery);
 
+        Map<Integer, Integer> sleepStatusRateMap = new HashMap<>();
+        sleepStatusRateMap.put(0, 0);
+        sleepStatusRateMap.put(1, 0);
+        sleepStatusRateMap.put(2, 0);
+        sleepStatusRateMap.put(3, 0);
+        sleepStatusRateMap.put(4, 0);
         List<SleepStatusRateVo> sleepStatusRateVos = itSmStatService.sleepStatus(healthReportQueryVo.getDeviceCode(), startTime.atStartOfDay(), LocalDateTime.of(endTime, LocalTime.MAX));
-        healthReportVo.setSleepStatusVos(sleepStatusRateVos);
+        for (SleepStatusRateVo sleepStatusRateVo : sleepStatusRateVos) {
+            sleepStatusRateMap.put(sleepStatusRateVo.getStatus(), sleepStatusRateVo.getSize());
+        }
+        healthReportVo.setSleepStatusMap(sleepStatusRateMap);
 
         HeartRateReportVo heartRateReportVo = new HeartRateReportVo();
         RespiratoryRateReportVo respiratoryRateReportVo = new RespiratoryRateReportVo();

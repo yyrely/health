@@ -1,6 +1,6 @@
 package com.chuncongcong.health.model.vo;
 
-import java.util.List;
+import java.util.Map;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class HealthReportVo {
     private SleepInfoVo sleepInfoVo;
 
     @ApiModelProperty("睡眠状态列表")
-    private List<SleepStatusRateVo> sleepStatusVos;
+    private Map<Integer, Integer> sleepStatusMap;
 
     @ApiModelProperty("心率信息")
     private HeartRateReportVo heartRateVos;
