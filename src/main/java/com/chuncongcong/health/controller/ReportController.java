@@ -96,6 +96,7 @@ public class ReportController {
 			}
             healthReportVo.setSleepInfoVo(BeanUtil.copyProperties(vSmStatPo, SleepInfoVo.class));
             ahiReportVo.setStatus(healthReportVo.getSleepInfoVo().getAhis());
+            ahiReportVo.setHappenNum(healthReportVo.getSleepInfoVo().getAhio());
         }
 //        LambdaQueryWrapper<TSmStatPo> tSmStatPoQuery = Wrappers.lambdaQuery(TSmStatPo.class);
 //        tSmStatPoQuery.eq(TSmStatPo::getDeviceCode, healthReportQueryVo.getDeviceCode());
